@@ -46,8 +46,9 @@ public @interface PluginDescriptor {
     String Geoff = "<html>[<font color=#ffbc03>G</font>] ";
     String Bttqjs = "<html>[<font color=#e57373>J</font>] ";
     String zuk = "<html>[<font color=#5F9596>Z</font>] ";
+    String Lalaz4 = "<html>[<font color=#AFE1AF>L</font>] ";
     String GZ = "<html>[<font color=#0077B6>\u2728</font>] ";
-    
+
     String name();
 
     /**
