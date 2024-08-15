@@ -14,6 +14,7 @@ import net.runelite.client.plugins.microbot.util.math.Random;
 import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.tile.Rs2Tile;
 import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
+import net.runelite.client.plugins.microbot.woodcutting.enums.WoodcuttingResetOptions;
 import net.runelite.client.plugins.microbot.woodcutting.enums.WoodcuttingWalkBack;
 
 import java.util.Arrays;
@@ -51,6 +52,12 @@ public class AutoWoodcuttingScript extends Script {
 
                 if (!config.TREE().hasRequiredLevel()) {
                     Microbot.showMessage("You do not have the required woodcutting level to cut this tree.");
+                    shutdown();
+                    return;
+                }
+
+                if(config.resetOptions() == WoodcuttingResetOptions.FIREMAKE && !config.TREE().isBurnable()) {
+                    Microbot.showMessage(config.TREE().getLog() + " is not burnable.");
                     shutdown();
                     return;
                 }
