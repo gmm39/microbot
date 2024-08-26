@@ -56,15 +56,39 @@ public interface HerbloreConfig extends Config {
     }
 
     @ConfigItem(
-            name = "Action Type",
-            keyName = "ActionType",
-            description = "Type of herblore action",
+            name = "Cleaning",
+            keyName = "cleaning",
+            description = "Cleaning herbs",
             position = 1,
             section = generalSection
     )
 
-    default HerbloreAction ActionType() {
-        return HerbloreAction.CLEANING;
+    default boolean cleaning() {
+        return false;
+    }
+
+    @ConfigItem(
+            name = "Unfinished Potions",
+            keyName = "unfinishedPotions",
+            description = "Creating unfinished potions",
+            position = 2,
+            section = generalSection
+    )
+
+    default boolean unfinishedPotions() {
+        return false;
+    }
+
+    @ConfigItem(
+            name = "Potions",
+            keyName = "potions",
+            description = "Creating potions",
+            position = 3,
+            section = generalSection
+    )
+
+    default boolean potions() {
+        return false;
     }
 
     @ConfigItem(

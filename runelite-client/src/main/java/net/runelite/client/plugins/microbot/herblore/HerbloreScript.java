@@ -3,9 +3,9 @@ package net.runelite.client.plugins.microbot.herblore;
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.microbot.Microbot;
 import net.runelite.client.plugins.microbot.Script;
+import net.runelite.client.plugins.microbot.herblore.enums.HerbloreAction;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.microbot.util.antiban.Rs2AntibanSettings;
-import net.runelite.client.plugins.microbot.util.antiban.enums.ActivityIntensity;
 import net.runelite.client.plugins.microbot.util.bank.Rs2Bank;
 import net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.microbot.util.keyboard.Rs2Keyboard;
@@ -13,7 +13,7 @@ import net.runelite.client.plugins.microbot.util.player.Rs2Player;
 import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
 
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -21,19 +21,29 @@ import java.util.concurrent.TimeUnit;
 
 public class HerbloreScript extends Script {
 
-    public static String version = "1.0";
+    public static String version = "1.1";
+    private static List<HerbloreAction> actions = new ArrayList<>();
 
     public boolean run(HerbloreConfig config) {
         Microbot.enableAutoRunOn = false;
 
         Rs2Antiban.antibanSetupTemplates.applyHerbloreSetup();
 
+        if(config.cleaning()) actions.add(HerbloreAction.CLEANING);
+        if(config.unfinishedPotions()) actions.add(HerbloreAction.UNFINISHED_POTIONS);
+        if(config.potions()) actions.add(HerbloreAction.POTIONS);
+
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
             try {
                 if (!super.run() || !Microbot.isLoggedIn() ||
                         Rs2AntibanSettings.actionCooldownActive || Microbot.pauseAllScripts) return;
 
-                switch(config.ActionType()) {
+                if(actions.isEmpty()) {
+                    shutdown();
+                    return;
+                }
+
+                switch(actions.get(0)) {
                     case CLEANING:
                         cleaning(config);
                         break;
@@ -45,6 +55,9 @@ public class HerbloreScript extends Script {
                     case POTIONS:
                         potions(config);
                         break;
+
+                    default:
+                        shutdown();
                 }
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
@@ -77,6 +90,7 @@ public class HerbloreScript extends Script {
 
         getItems(ingredients);
 
+        //Unfinished potion creation
         do {
             Rs2Inventory.combine(ingredients.get(0), ingredients.get(1));
             sleepUntil(() -> Rs2Widget.findWidget("How many do you wish to make?", null, false) != null);
@@ -97,6 +111,7 @@ public class HerbloreScript extends Script {
 
         getItems(ingredients);
 
+        //Potion creation
         do {
             Rs2Inventory.combine(ingredients.get(0), ingredients.get(1));
             sleepUntil(() -> Rs2Widget.findWidget("How many do you wish to make?", null, false) != null);
@@ -124,9 +139,9 @@ public class HerbloreScript extends Script {
                 sleep(250, 500); //buffer
             }
             else {
-                Rs2Bank.closeBank();
-                Microbot.showMessage("You do not have the required items.");
-                shutdown();
+                actions.remove(0);
+                if(actions.isEmpty()) Rs2Bank.closeBank();
+                return;
             }
         }
 
